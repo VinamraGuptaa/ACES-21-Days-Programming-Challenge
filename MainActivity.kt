@@ -24,11 +24,13 @@ import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
@@ -165,7 +167,7 @@ class MainActivity : AppCompatActivity() {
                 if(response!!.isSuccessful){
                     hideDialogBox()
                     val weatherList=response.body()
-                    Log.i("Weather Response","$weatherList")
+                    setupUI(weatherList)
                 }
                 else{
                     val rc =response.code()
@@ -194,6 +196,40 @@ class MainActivity : AppCompatActivity() {
         if(mProgressDialog!=null){
             mProgressDialog!!.dismiss()
         }
+    }
+
+    fun setupUI(weatherList:WeatherResponse){
+        for(i in weatherList.weather.indices){
+           tv_main.text=weatherList.weather[i].main
+            tv_main_description.text=weatherList.weather[i].description
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                tv_temp.text=weatherList.main.temp.toString() + getUnit(application.resources.configuration.locales.toString())
+            }
+            tv_sunrise_time.text=getTime(weatherList.sys.sunrise)
+            tv_sunset_time.text=getTime(weatherList.sys.sunset)
+            tv_max.text=weatherList.main.temp_max.toString()
+            tv_min.text=weatherList.main.temp_min.toString()
+            tv_speed.text=weatherList.wind.speed.toString()
+            tv_speed_unit.text=Constants.METRIC_UNIT
+            tv_name.text=weatherList.name
+            tv_country.text=weatherList.sys.country
+        }
+    }
+    fun getUnit(value:String):String?{
+        var value="C"
+        if("US"==value||"LR"==value||"MM"==value){
+            value="F"
+        }
+        return value
+    }
+
+    fun getTime(Timex:Long):String?{
+        val date= Date(Timex*1000L)
+        val sdf= java.text.SimpleDateFormat("HH:mm:ss",Locale.UK)
+        sdf.timeZone=TimeZone.getDefault()
+        return sdf.format(date)
+
+
     }
 
 
