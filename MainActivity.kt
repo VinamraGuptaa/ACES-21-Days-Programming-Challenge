@@ -7,6 +7,7 @@ import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.location.Location
 import android.location.LocationManager
 import android.net.Uri
@@ -14,11 +15,14 @@ import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.weatherapp.models.WeatherResponse
 import com.example.weatherapp.network.WeatherService
 import com.google.android.gms.location.*
+import com.google.gson.Gson
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -35,9 +39,13 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     var mProgressDialog:Dialog?=null
+    private lateinit var  mSharedPreferences:SharedPreferences
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        mSharedPreferences=getSharedPreferences(Constants.PREFER_NAME, MODE_PRIVATE)
+        setupUI()
         setContentView(R.layout.activity_main)
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         if (!isLocationEnabled()) {
@@ -167,7 +175,11 @@ class MainActivity : AppCompatActivity() {
                 if(response!!.isSuccessful){
                     hideDialogBox()
                     val weatherList=response.body()
-                    setupUI(weatherList)
+                    val weatherListtoString= Gson().toJson(weatherList)
+                    val editor=mSharedPreferences.edit()
+                    editor.putString(Constants.KEY,weatherListtoString)
+                    editor.apply()
+                    setupUI()
                 }
                 else{
                     val rc =response.code()
@@ -198,22 +210,49 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun setupUI(weatherList:WeatherResponse){
-        for(i in weatherList.weather.indices){
-           tv_main.text=weatherList.weather[i].main
-            tv_main_description.text=weatherList.weather[i].description
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                tv_temp.text=weatherList.main.temp.toString() + getUnit(application.resources.configuration.locales.toString())
+    fun setupUI() {
+        val weatherListgetString=mSharedPreferences.getString(Constants.KEY,"")
+        if(!weatherListgetString.isNullOrBlank()){
+            val weatherList=Gson().fromJson(weatherListgetString,WeatherResponse::class.java)
+            for(i in weatherList.weather.indices){
+                tv_main.text=weatherList.weather[i].main
+                tv_main_description.text=weatherList.weather[i].description
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                    tv_temp.text=weatherList.main.temp.toString() + getUnit(application.resources.configuration.locales.toString())
+                }
+                tv_sunrise_time.text=getTime(weatherList.sys.sunrise)
+                tv_sunset_time.text=getTime(weatherList.sys.sunset)
+                tv_max.text=weatherList.main.temp_max.toString() + "max"
+                tv_min.text=weatherList.main.temp_min.toString() + "min"
+                tv_speed.text=weatherList.wind.speed.toString()
+                tv_speed_unit.text=Constants.METRIC_UNIT
+                tv_name.text=weatherList.name
+                tv_country.text=weatherList.sys.country
+                tv_humidity.text=weatherList.main.humidity.toString() + "%"
+                when(weatherList.weather[i].icon){
+                    "01d"-> iv_main.setImageResource(R.drawable.morning)
+                    "02d"->iv_main.setImageResource(R.drawable.cloud)
+                    "03d"->iv_main.setImageResource(R.drawable.cloud)
+                    "04d"->iv_main.setImageResource(R.drawable.cloud)
+                    "09d"->iv_main.setImageResource(R.drawable.rain)
+                    "10d"->iv_main.setImageResource(R.drawable.rain)
+                    "11d"-> iv_main.setImageResource(R.drawable.storm)
+                    "13d"->iv_main.setImageResource(R.drawable.snowflake)
+                    "01n"->iv_main.setImageResource(R.drawable.sunny)
+                    "02n"->iv_main.setImageResource(R.drawable.cloud)
+                    "03n"->iv_main.setImageResource(R.drawable.cloud)
+                    "04n"->iv_main.setImageResource(R.drawable.cloud)
+                    "09n"->iv_main.setImageResource(R.drawable.rain)
+                    "10n"->iv_main.setImageResource(R.drawable.rain)
+                    "11n"->iv_main.setImageResource(R.drawable.storm)
+                    "13n"->iv_main.setImageResource(R.drawable.snowflake)
+                    "50d"->iv_main.setImageResource(R.drawable.mist)
+                    "50n"->iv_main.setImageResource(R.drawable.mist)
+                }
             }
-            tv_sunrise_time.text=getTime(weatherList.sys.sunrise)
-            tv_sunset_time.text=getTime(weatherList.sys.sunset)
-            tv_max.text=weatherList.main.temp_max.toString()
-            tv_min.text=weatherList.main.temp_min.toString()
-            tv_speed.text=weatherList.wind.speed.toString()
-            tv_speed_unit.text=Constants.METRIC_UNIT
-            tv_name.text=weatherList.name
-            tv_country.text=weatherList.sys.country
+
         }
+
     }
     fun getUnit(value:String):String?{
         var value="C"
@@ -225,9 +264,31 @@ class MainActivity : AppCompatActivity() {
 
     fun getTime(Timex:Long):String?{
         val date= Date(Timex*1000L)
-        val sdf= java.text.SimpleDateFormat("HH:mm:ss",Locale.UK)
+        val sdf= java.text.SimpleDateFormat("HH:mm",Locale.UK)
         sdf.timeZone=TimeZone.getDefault()
         return sdf.format(date)
+
+
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main,menu)
+
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId) {
+            R.id.i_refresh -> {
+                requestLocationData()
+                true
+            }
+            else -> {
+                super.onOptionsItemSelected(item)
+                false
+            }
+        }
+
 
 
     }
