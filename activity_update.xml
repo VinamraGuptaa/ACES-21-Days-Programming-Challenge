@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:background="#121212"
+    android:layout_height="match_parent"
+    tools:context=".updateActivity">
+
+
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_writenotes"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize">
+    </androidx.appcompat.widget.Toolbar>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_title"
+        android:layout_width="match_parent"
+        app:boxStrokeColor="#2f4f4f"
+
+        android:layout_height="wrap_content"
+
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        app:boxCornerRadiusBottomEnd="20dp"
+        app:boxCornerRadiusBottomStart="20dp"
+        app:boxCornerRadiusTopEnd="20dp"
+        app:boxCornerRadiusTopStart="20dp"
+        app:counterOverflowTextColor="@android:color/holo_red_dark"
+        app:errorEnabled="true"
+        app:counterMaxLength="15"
+        app:counterEnabled="true">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/update_et_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Title"
+            android:layout_gravity="center"
+            android:textSize="18sp"
+            android:textColorHint="#FFFF"
+            android:textStyle="bold"
+            android:inputType="text|textCapSentences|textShortMessage">
+
+        </com.google.android.material.textfield.TextInputEditText>
+
+    </com.google.android.material.textfield.TextInputLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="10dp"
+
+        android:background="#8C92AC"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:id="@+id/update_tv_date"
+        android:textSize="18sp">
+
+    </TextView>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:elevation="5dp"
+        android:hint="Decription"
+        app:counterEnabled="true"
+        app:boxStrokeColor="#2f4f4f"
+        app:counterMaxLength="500"
+        app:hintTextColor="#FFFF"
+
+        app:boxCornerRadiusBottomEnd="20dp"
+        app:boxCornerRadiusBottomStart="20dp"
+        app:boxCornerRadiusTopEnd="20dp"
+        app:boxCornerRadiusTopStart="20dp"
+
+
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/update_et_Body"
+            android:layout_width="match_parent"
+            android:layout_height="500dp"
+            android:textSize="18sp"
+            android:gravity="top|start"
+            android:textStyle="bold"
+            android:inputType="textMultiLine|textCapSentences">
+
+        </com.google.android.material.textfield.TextInputEditText>
+    </com.google.android.material.textfield.TextInputLayout>
+    <ImageView
+
+        android:contentDescription="UpdateImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/img_Update"
+        android:layout_gravity="center"
+        android:src="@drawable/update_btn">
+
+    </ImageView>
+
+
+</LinearLayout>
